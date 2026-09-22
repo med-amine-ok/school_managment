@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Clock, MapPin, User, CheckCircle2, Calendar } from 'lucide-react';
+import { Clock, MapPin, User, CheckCircle2, Calendar, Users } from 'lucide-react';
 import { Card, CardHeader, CardContent } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
@@ -10,6 +10,7 @@ import { mockSubjects } from '@/data/subjects';
 import { mockTeachers } from '@/data/teachers';
 import { mockGroups } from '@/data/groups';
 import { mockRooms } from '@/data/rooms';
+import { mockEnrollments } from '@/data/enrollments';
 
 interface TodayScheduleProps {
   onMarkAttendance?: (sessionId: string) => void;
@@ -24,15 +25,17 @@ export const TodaySchedule: React.FC<TodayScheduleProps> = ({ onMarkAttendance }
   const getTeacher = (id: string) => mockTeachers.find((t) => t.id === id);
   const getGroup = (id: string) => mockGroups.find((g) => g.id === id);
   const getRoom = (id: string) => mockRooms.find((r) => r.id === id);
+  const getEnrolledCount = (groupId: string) =>
+    mockEnrollments.filter((e) => e.groupId === groupId && e.status === 'Active').length;
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="overflow-hidden">
       <CardHeader
         title={
           <div className="flex items-center gap-2">
             <span>Today&apos;s Class Schedule</span>
             <Badge variant="primary" size="sm">
-              {todaySessions.length} Classes Scheduled
+              {todaySessions.length} Classes Today
             </Badge>
           </div>
         }
@@ -47,76 +50,96 @@ export const TodaySchedule: React.FC<TodayScheduleProps> = ({ onMarkAttendance }
         }
       />
 
-      <CardContent className="flex-1 divide-y divide-[#F1F5F9] p-0 max-h-[460px] overflow-y-auto">
+      <CardContent className="divide-y divide-[#F1F5F9] p-0 max-h-[460px] overflow-y-auto">
         {todaySessions.length === 0 ? (
           <div className="p-8 text-center text-[#94A3B8]">
             <Calendar className="w-10 h-10 mx-auto text-[#CBD5E1] mb-2" />
             <p className="text-sm font-medium">No sessions scheduled for today</p>
           </div>
         ) : (
-          todaySessions.map((session, index) => {
+          todaySessions.map((session) => {
             const subject = getSubject(session.subjectId);
             const teacher = getTeacher(session.teacherId);
             const group = getGroup(session.groupId);
             const room = getRoom(session.roomId);
+            const enrolledCount = group ? getEnrolledCount(group.id) : 0;
+            const maxCapacity = group?.maxCapacity || 25;
 
             return (
               <div
                 key={session.id}
-                className="p-4 hover:bg-[#F8FAFC] transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                className="p-3.5 sm:p-4 hover:bg-[#F8FAFC] transition-colors flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4"
               >
-                {/* Time & Color Bar */}
-                <div className="flex items-start gap-3">
+                {/* Left: Time Pill & Color Tag */}
+                <div className="flex items-center gap-3 shrink-0">
                   <div
-                    className="w-1.5 self-stretch rounded-full shrink-0"
+                    className="w-1.5 h-11 rounded-full shrink-0"
                     style={{ backgroundColor: subject?.color || '#4F6EF7' }}
                   />
-                  <div className="flex flex-col min-w-[90px]">
+                  <div className="flex flex-col min-w-[85px]">
                     <span className="text-xs font-bold text-[#1E293B] flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5 text-[#64748B]" />
+                      <Clock className="w-3.5 h-3.5 text-[#4F6EF7]" />
                       {session.startTime}
                     </span>
-                    <span className="text-[11px] text-[#94A3B8]">
-                      to {session.endTime} ({session.durationMinutes}m)
+                    <span className="text-[11px] text-[#64748B] font-medium">
+                      until {session.endTime}
                     </span>
-                  </div>
-
-                  {/* Subject & Group Details */}
-                  <div className="flex flex-col">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-sm font-bold text-[#1E293B]">
-                        {subject?.name}
-                      </h4>
-                      <Badge
-                        variant="neutral"
-                        size="sm"
-                        className="text-[10px]"
-                      >
-                        {group?.name.split('(')[0] || 'Group'}
-                      </Badge>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#64748B] mt-1">
-                      <span className="flex items-center gap-1">
-                        <User className="w-3.5 h-3.5 text-[#94A3B8]" />
-                        {teacher?.name}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5 text-[#94A3B8]" />
-                        {room?.name}
-                      </span>
-                    </div>
                   </div>
                 </div>
 
-                {/* Status & Action */}
-                <div className="flex items-center gap-2 sm:self-center pl-4 sm:pl-0">
+                {/* Middle: Subject, Group & Cohort */}
+                <div className="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3 items-center">
+                  {/* Subject and Group */}
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-xs sm:text-sm font-bold text-[#1E293B] truncate">
+                        {subject?.name}
+                      </h4>
+                      <Badge variant="neutral" size="sm" className="text-[10px] shrink-0">
+                        {group?.name.split('(')[0]?.trim() || 'Group'}
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] text-[#64748B] truncate mt-0.5">
+                      {group?.name.includes('(') ? group.name.split('(')[1]?.replace(')', '') : 'Secondary Cycle'}
+                    </p>
+                  </div>
+
+                  {/* Teacher & Instructor */}
+                  <div className="flex items-center gap-2 text-xs text-[#64748B] min-w-0">
+                    <div className="w-7 h-7 rounded-full bg-[#EEF2FF] text-[#4F6EF7] flex items-center justify-center font-bold text-[11px] shrink-0">
+                      {teacher?.name?.split(' ').map((n) => n[0]).join('') || 'TC'}
+                    </div>
+                    <div className="min-w-0">
+                      <span className="font-semibold text-[#1E293B] truncate block text-xs">
+                        {teacher?.name}
+                      </span>
+                      <span className="text-[10px] text-[#94A3B8] truncate block">
+                        {teacher?.specialization?.split('&')[0]?.trim() || 'Faculty'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Facility & Capacity */}
+                  <div className="flex flex-col sm:items-start md:items-end text-xs text-[#64748B]">
+                    <span className="flex items-center gap-1 font-semibold text-[#1E293B] text-[11px]">
+                      <MapPin className="w-3.5 h-3.5 text-[#14B8A6]" />
+                      {room?.name}
+                    </span>
+                    <span className="text-[10px] text-[#64748B] flex items-center gap-1 mt-0.5">
+                      <Users className="w-3 h-3 text-[#94A3B8]" />
+                      {enrolledCount}/{maxCapacity} Enrolled
+                    </span>
+                  </div>
+                </div>
+
+                {/* Right: Actions */}
+                <div className="flex items-center gap-2 shrink-0 self-end lg:self-center">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => onMarkAttendance && onMarkAttendance(session.id)}
                     icon={<CheckCircle2 className="w-3.5 h-3.5 text-[#14B8A6]" />}
-                    className="text-xs"
+                    className="text-xs font-semibold hover:border-[#14B8A6] hover:text-[#14B8A6]"
                   >
                     Attendance
                   </Button>

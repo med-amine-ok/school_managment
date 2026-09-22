@@ -14,6 +14,8 @@ export interface Employee {
   id: string;
   employeeIdNumber: string; // e.g. EMP-2026-001
   name: string;
+  username?: string;
+  password?: string;
   role: EmployeeRole;
   phone: string;
   email: string;

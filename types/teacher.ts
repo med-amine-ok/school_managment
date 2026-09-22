@@ -8,6 +8,8 @@ export interface Teacher {
   profilePhoto?: string;
   phone: string;
   email: string;
+  username?: string;
+  password?: string;
   address: string;
   dateOfBirth: string;
   hireDate: string;

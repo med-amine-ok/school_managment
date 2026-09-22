@@ -49,7 +49,8 @@ export const CardContent: React.FC<{
   children: React.ReactNode;
   className?: string;
 }> = ({ children, className = '' }) => {
-  return <div className={`p-5 ${className}`}>{children}</div>;
+  const hasCustomPadding = /\bp(?:[xytbrl])?-\d+/.test(className);
+  return <div className={`${hasCustomPadding ? '' : 'p-5'} ${className}`}>{children}</div>;
 };
 
 export const CardFooter: React.FC<{

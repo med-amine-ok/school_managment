@@ -10,7 +10,7 @@ export const FinanceOverviewWidget: React.FC = () => {
   const kpis = getFinancialKPIs();
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="overflow-hidden">
       <CardHeader
         title="Financial Cash Flow Summary"
         subtitle="September 2026 — Real-time ledger accounting (DZD)"

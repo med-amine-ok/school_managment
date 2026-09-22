@@ -90,7 +90,7 @@ export default function StudentProfilePage({ params }: StudentProfilePageProps) 
     { id: 'schedule', label: 'Class Schedule', icon: <Calendar className="w-4 h-4" /> },
     { id: 'attendance', label: 'Attendance History', icon: <ClipboardCheck className="w-4 h-4" />, badge: `${attendance.attendancePercentage}%` },
     { id: 'payments', label: 'Financial Ledger', icon: <CreditCard className="w-4 h-4" /> },
-    { id: 'notes', label: 'Pedagogical Notes', icon: <FileText className="w-4 h-4" /> },
+  
   ];
 
   return (

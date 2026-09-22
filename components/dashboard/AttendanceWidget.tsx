@@ -9,7 +9,7 @@ export const AttendanceWidget: React.FC = () => {
   const stats = getSchoolAttendanceOverview();
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="overflow-hidden">
       <CardHeader
         title="Attendance Performance"
         subtitle="Cumulative academic attendance across all enrolled groups"

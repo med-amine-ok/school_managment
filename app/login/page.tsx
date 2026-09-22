@@ -7,11 +7,13 @@ import {
   ShieldCheck,
   Lock,
   Mail,
+  User,
   ArrowRight,
   UserCheck,
   GraduationCap,
   Briefcase,
   Sparkles,
+  Key,
 } from 'lucide-react';
 import { useAuth, UserRole, PRESET_USERS } from '@/lib/context/AuthContext';
 import { Button } from '@/components/ui/Button';
@@ -19,18 +21,30 @@ import { Badge } from '@/components/ui/Badge';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, registeredAccounts } = useAuth();
 
   const [selectedRole, setSelectedRole] = useState<UserRole>('ADMIN');
-  const [email, setEmail] = useState<string>(PRESET_USERS.ADMIN.email);
-  const [password, setPassword] = useState<string>('••••••••••••');
+  const [identifier, setIdentifier] = useState<string>(PRESET_USERS.ADMIN.username || 'admin');
+  const [password, setPassword] = useState<string>('admin');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Filter custom added accounts (created by admin for teachers/employees)
+  const customAccounts = registeredAccounts.filter(
+    (a) => !['usr-admin', 'usr-teacher', 'usr-employee'].includes(a.id)
+  );
+
   const handleRoleSelect = (role: UserRole) => {
     setSelectedRole(role);
-    setEmail(PRESET_USERS[role].email);
-    setPassword('••••••••••••');
+    setIdentifier(PRESET_USERS[role].username || PRESET_USERS[role].email);
+    setPassword(PRESET_USERS[role].password || 'admin');
+    setErrorMessage(null);
+  };
+
+  const handleSelectCustomAccount = (account: any) => {
+    setSelectedRole(account.role);
+    setIdentifier(account.username || account.email);
+    setPassword(account.password || 'password123');
     setErrorMessage(null);
   };
 
@@ -40,12 +54,14 @@ export default function LoginPage() {
     setErrorMessage(null);
 
     try {
-      await login(selectedRole, email, password);
+      await login(selectedRole, identifier, password);
       setTimeout(() => {
         router.push('/');
       }, 400);
-    } catch {
-      setErrorMessage('Invalid authentication credentials. Please try again.');
+    } catch (err: any) {
+      setErrorMessage(
+        err?.message || 'Invalid authentication credentials. Please check your username and password.'
+      );
       setIsLoading(false);
     }
   };
@@ -152,26 +168,26 @@ export default function LoginPage() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {errorMessage && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600">
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 font-medium">
                 {errorMessage}
               </div>
             )}
 
             <div>
               <label className="block text-xs font-semibold text-[#1E293B] mb-1.5">
-                Institutional Email Address
+                Username or Institutional Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#94A3B8]">
-                  <Mail className="w-4 h-4" />
+                  <User className="w-4 h-4" />
                 </div>
                 <input
-                  type="email"
+                  type="text"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-9 pr-3 py-2 text-sm border border-[#E2E8F0] rounded-xl bg-white text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#4F6EF7] focus:border-transparent transition-all"
-                  placeholder="name@elnadjah.dz"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  className="block w-full pl-9 pr-3 py-2 text-sm border border-[#E2E8F0] rounded-xl bg-white text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#4F6EF7] focus:border-transparent transition-all font-mono"
+                  placeholder="username or name@elnadjah.dz"
                 />
               </div>
             </div>
@@ -201,7 +217,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-9 pr-3 py-2 text-sm border border-[#E2E8F0] rounded-xl bg-white text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#4F6EF7] focus:border-transparent transition-all"
+                  className="block w-full pl-9 pr-3 py-2 text-sm border border-[#E2E8F0] rounded-xl bg-white text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#4F6EF7] focus:border-transparent transition-all font-mono"
                 />
               </div>
             </div>
@@ -217,7 +233,7 @@ export default function LoginPage() {
               </label>
 
               <span className="text-[11px] text-[#94A3B8] flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-[#14B8A6]" /> Quick Demo Active
+                <Sparkles className="w-3 h-3 text-[#14B8A6]" /> Portal Auth Active
               </span>
             </div>
 
@@ -230,10 +246,49 @@ export default function LoginPage() {
                 disabled={isLoading}
                 icon={<ArrowRight className="w-4 h-4" />}
               >
-                {isLoading ? 'Authenticating...' : `Sign In as ${PRESET_USERS[selectedRole].name}`}
+                {isLoading ? 'Authenticating...' : `Sign In with Credentials`}
               </Button>
             </div>
           </form>
+
+          {/* Newly Added Accounts (Created by Admin) */}
+          {customAccounts.length > 0 && (
+            <div className="mt-6 pt-5 border-t border-[#F1F5F9]">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-[11px] font-bold text-[#1E293B] uppercase tracking-wider flex items-center gap-1.5">
+                  <Key className="w-3.5 h-3.5 text-[#4F6EF7]" /> Newly Added Staff & Teachers
+                </p>
+                <Badge variant="success" size="sm">
+                  {customAccounts.length} Custom Account{customAccounts.length > 1 ? 's' : ''}
+                </Badge>
+              </div>
+              <div className="space-y-2">
+                {customAccounts.map((acc) => (
+                  <button
+                    key={acc.id}
+                    type="button"
+                    onClick={() => handleSelectCustomAccount(acc)}
+                    className="w-full p-2.5 rounded-xl border border-[#E2E8F0] hover:border-[#4F6EF7] hover:bg-[#EEF2FF]/40 transition-all text-left flex items-center justify-between cursor-pointer group"
+                  >
+                    <div>
+                      <div className="text-xs font-bold text-[#1E293B] group-hover:text-[#4F6EF7]">
+                        {acc.name}
+                      </div>
+                      <div className="text-[11px] text-[#64748B] font-mono">
+                        user: <span className="font-semibold text-[#1E293B]">{acc.username}</span> | pass: <span className="font-semibold text-[#1E293B]">{acc.password}</span>
+                      </div>
+                    </div>
+                    <Badge
+                      variant={acc.role === 'TEACHER' ? 'info' : 'neutral'}
+                      size="sm"
+                    >
+                      {acc.role}
+                    </Badge>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Quick Demo Login Cards */}
           <div className="mt-6 pt-6 border-t border-[#F1F5F9]">
@@ -245,7 +300,7 @@ export default function LoginPage() {
                 type="button"
                 onClick={() => {
                   handleRoleSelect('ADMIN');
-                  login('ADMIN');
+                  login('ADMIN', 'admin', 'admin');
                   setTimeout(() => router.push('/'), 200);
                 }}
                 className="p-2.5 rounded-xl border border-[#E2E8F0] hover:border-[#4F6EF7] hover:bg-[#EEF2FF]/50 transition-all text-left cursor-pointer group"
@@ -260,7 +315,7 @@ export default function LoginPage() {
                 type="button"
                 onClick={() => {
                   handleRoleSelect('TEACHER');
-                  login('TEACHER');
+                  login('TEACHER', 'ahmed.benali', 'teacher123');
                   setTimeout(() => router.push('/'), 200);
                 }}
                 className="p-2.5 rounded-xl border border-[#E2E8F0] hover:border-[#4F6EF7] hover:bg-[#EEF2FF]/50 transition-all text-left cursor-pointer group"
@@ -275,7 +330,7 @@ export default function LoginPage() {
                 type="button"
                 onClick={() => {
                   handleRoleSelect('EMPLOYEE');
-                  login('EMPLOYEE');
+                  login('EMPLOYEE', 'fatima.zohra', 'staff123');
                   setTimeout(() => router.push('/'), 200);
                 }}
                 className="p-2.5 rounded-xl border border-[#E2E8F0] hover:border-[#4F6EF7] hover:bg-[#EEF2FF]/50 transition-all text-left cursor-pointer group"

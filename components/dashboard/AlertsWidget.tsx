@@ -64,7 +64,7 @@ export const AlertsWidget: React.FC = () => {
   ];
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="overflow-hidden">
       <CardHeader
         title={
           <div className="flex items-center gap-2">
@@ -82,28 +82,30 @@ export const AlertsWidget: React.FC = () => {
           <a
             key={alert.id}
             href={alert.actionHref}
-            className="p-4 hover:bg-[#F8FAFC] transition-colors flex items-start gap-3.5 group cursor-pointer block"
+            className="p-3.5 sm:px-5 hover:bg-[#F8FAFC] transition-colors flex items-center justify-between gap-3.5 group cursor-pointer"
           >
-            <div className="w-8 h-8 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] flex items-center justify-center shrink-0 mt-0.5">
-              {alert.icon}
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between gap-2">
-                <h4 className="text-xs font-bold text-[#1E293B] group-hover:text-[#4F6EF7] transition-colors truncate">
-                  {alert.title}
-                </h4>
-                <Badge variant={alert.badgeVariant} size="sm">
-                  {alert.badgeText}
-                </Badge>
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <div className="w-8 h-8 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] flex items-center justify-center shrink-0">
+                {alert.icon}
               </div>
 
-              <p className="text-xs text-[#64748B] mt-1 line-clamp-2 leading-relaxed">
-                {alert.description}
-              </p>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h4 className="text-xs font-bold text-[#1E293B] group-hover:text-[#4F6EF7] transition-colors truncate">
+                    {alert.title}
+                  </h4>
+                  <Badge variant={alert.badgeVariant} size="sm" className="shrink-0 text-[10px]">
+                    {alert.badgeText}
+                  </Badge>
+                </div>
+
+                <p className="text-[11px] text-[#64748B] mt-0.5 line-clamp-1 leading-normal">
+                  {alert.description}
+                </p>
+              </div>
             </div>
 
-            <ArrowRight className="w-4 h-4 text-[#CBD5E1] group-hover:text-[#4F6EF7] group-hover:translate-x-0.5 transition-all self-center shrink-0" />
+            <ArrowRight className="w-4 h-4 text-[#CBD5E1] group-hover:text-[#4F6EF7] group-hover:translate-x-0.5 transition-all shrink-0" />
           </a>
         ))}
       </CardContent>

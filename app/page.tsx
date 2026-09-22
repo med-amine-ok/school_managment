@@ -153,7 +153,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Main Content Layout: Two Columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           {/* Left Column (2 Cols wide on desktop): Today Schedule & Alerts */}
           <div className="lg:col-span-2 space-y-6">
             {/* Today Schedule Timeline */}

@@ -12,7 +12,9 @@ import {
   UserCheck,
   Building,
   CheckCircle2,
+  Key,
 } from 'lucide-react';
+import { useAuth } from '@/lib/context/AuthContext';
 import { AppShell } from '@/components/layout/AppShell';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
@@ -32,11 +34,15 @@ export default function EmployeesPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [successToast, setSuccessToast] = useState<string | null>(null);
 
+  const { registerAccount } = useAuth();
+
   const [formData, setFormData] = useState({
     name: '',
     role: 'Administration' as EmployeeRole,
     phone: '+213 55',
     email: '',
+    username: '',
+    password: 'staff123',
     salary: '55000',
     notes: 'Full-time institutional staff member',
   });
@@ -64,26 +70,50 @@ export default function EmployeesPage() {
     e.preventDefault();
     if (!formData.name) return;
 
+    const finalUsername =
+      formData.username.trim() || formData.name.toLowerCase().replace(/\s+/g, '.');
+    const finalPassword = formData.password.trim() || 'staff123';
+    const finalEmail =
+      formData.email.trim() || `${finalUsername}@elnadjah-school.dz`;
+
     const newEmp = await schoolService.createEmployee({
       name: formData.name,
       role: formData.role,
       phone: formData.phone,
-      email: formData.email || `${formData.name.toLowerCase().replace(/\s+/g, '.')}@elnadjah-school.dz`,
+      email: finalEmail,
+      username: finalUsername,
+      password: finalPassword,
       salary: parseFloat(formData.salary) || 55000,
       paymentSchedule: 'Monthly',
       status: 'Active',
       notes: formData.notes,
     });
 
+    // Register user account in AuthContext
+    registerAccount({
+      id: newEmp.id,
+      name: newEmp.name,
+      username: finalUsername,
+      password: finalPassword,
+      email: finalEmail,
+      role: 'EMPLOYEE',
+      title: `${newEmp.role} Staff`,
+      employeeId: newEmp.id,
+    });
+
     setEmployees((prev) => [newEmp, ...prev]);
     setIsAddModalOpen(false);
-    setSuccessToast(`Staff member ${newEmp.name} registered with ${formatCurrency(newEmp.salary)} monthly salary.`);
-    setTimeout(() => setSuccessToast(null), 3000);
+    setSuccessToast(
+      `Staff member ${newEmp.name} registered! Portal Username: "${finalUsername}" | Password: "${finalPassword}"`
+    );
+    setTimeout(() => setSuccessToast(null), 6000);
     setFormData({
       name: '',
       role: 'Administration',
       phone: '+213 55',
       email: '',
+      username: '',
+      password: 'staff123',
       salary: '55000',
       notes: 'Full-time institutional staff member',
     });
@@ -303,6 +333,53 @@ export default function EmployeesPage() {
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               className="w-full px-3 py-2 text-sm border border-[#E2E8F0] rounded-xl focus:ring-2 focus:ring-[#4F6EF7] focus:outline-none"
             />
+          </div>
+
+          {/* Login Credentials Section */}
+          <div className="p-3.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-[#1E293B] flex items-center gap-1.5">
+                <Key className="w-3.5 h-3.5 text-[#4F6EF7]" /> Portal Login Credentials
+              </span>
+              <Badge variant="neutral" size="sm">Staff Portal Access</Badge>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-[#1E293B] mb-1">
+                  Username *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder={
+                    formData.name
+                      ? formData.name.toLowerCase().replace(/\s+/g, '.')
+                      : 'e.g. nadir.mansouri'
+                  }
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  className="w-full px-3 py-2 text-xs border border-[#E2E8F0] rounded-lg focus:ring-2 focus:ring-[#4F6EF7] focus:outline-none bg-white font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-[#1E293B] mb-1">
+                  Password *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="staff123"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="w-full px-3 py-2 text-xs border border-[#E2E8F0] rounded-lg focus:ring-2 focus:ring-[#4F6EF7] focus:outline-none bg-white font-mono"
+                />
+              </div>
+            </div>
+            <p className="text-[10px] text-[#64748B]">
+              The staff member will use this username and password to log in at <span className="font-mono text-[#4F6EF7]">/login</span> and access admissions, tuition payments, and attendance.
+            </p>
           </div>
 
           <div className="flex items-center justify-end gap-2 pt-4 border-t border-[#F1F5F9]">
