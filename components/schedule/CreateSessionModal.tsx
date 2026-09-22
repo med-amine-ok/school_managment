@@ -23,6 +23,7 @@ import {
   getAvailableRooms,
   hasSchedulingConflict,
 } from '@/lib/calculations/conflicts';
+import { getGroupEnrollmentCount } from '@/lib/calculations/academic';
 import { Button } from '@/components/ui/Button';
 
 interface CreateSessionModalProps {
@@ -75,7 +76,7 @@ export function CreateSessionModal({
 
   // Selected group students
   const selectedGroup = mockGroups.find((g) => g.id === groupId);
-  const groupStudentsCount = selectedGroup?.studentsCount || 20;
+  const groupStudentsCount = selectedGroup ? getGroupEnrollmentCount(selectedGroup.id) : 20;
 
   // Real-time conflict evaluation
   const conflictReport = useMemo(() => {
@@ -102,7 +103,7 @@ export function CreateSessionModal({
     const occupied: { room: (typeof mockRooms)[0]; conflictSession?: Session }[] = [];
 
     mockRooms.forEach((room) => {
-      if (room.status === 'maintenance') return;
+      if (room.status === 'Maintenance') return;
 
       if (availableIds.has(room.id)) {
         // Check capacity requirement
@@ -237,7 +238,7 @@ export function CreateSessionModal({
               >
                 {mockGroups.map((g) => (
                   <option key={g.id} value={g.id}>
-                    {g.name} ({g.studentsCount} students)
+                    {g.name} ({getGroupEnrollmentCount(g.id)} students)
                   </option>
                 ))}
               </select>

@@ -26,7 +26,7 @@ export function SessionCard({ session, onClick, compact = false, style }: Sessio
   // Subtle status pill styling
   const getStatusBadge = () => {
     switch (session.status) {
-      case 'In progress':
+      case 'In Progress':
         return 'bg-teal-50 text-teal-700 border-teal-200';
       case 'Completed':
         return 'bg-emerald-50 text-emerald-700 border-emerald-200';

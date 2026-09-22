@@ -53,7 +53,7 @@ export function calculateRoomAvailability(
   excludeSessionId?: string
 ): RoomAvailabilityInfo {
   const room = mockRooms.find((r) => r.id === roomId);
-  if (room && (room.status === 'maintenance' || (room.status as string) === 'Maintenance')) {
+  if (room && room.status === 'Maintenance') {
     return {
       status: 'maintenance',
       isAvailable: false,
@@ -269,7 +269,7 @@ export function getAvailableRooms(
   }
 
   return mockRooms.filter((room) => {
-    if (room.status === 'maintenance' || (room.status as string) === 'Maintenance') return false;
+    if (room.status === 'Maintenance') return false;
     if (minCapacity && room.capacity < minCapacity) return false;
     const availability = calculateRoomAvailability(
       room.id,

@@ -82,9 +82,9 @@ export function RoomAvailabilityView({
     });
   }, [floorFilter, typeFilter, minCapacity]);
 
-  const availableCount = filteredRooms.filter((r) => availableIds.has(r.id) && r.status !== 'maintenance').length;
-  const occupiedCount = filteredRooms.filter((r) => !availableIds.has(r.id) && r.status !== 'maintenance').length;
-  const maintenanceCount = filteredRooms.filter((r) => r.status === 'maintenance').length;
+  const availableCount = filteredRooms.filter((r) => availableIds.has(r.id) && r.status !== 'Maintenance').length;
+  const occupiedCount = filteredRooms.filter((r) => !availableIds.has(r.id) && r.status !== 'Maintenance').length;
+  const maintenanceCount = filteredRooms.filter((r) => r.status === 'Maintenance').length;
 
   return (
     <div className="space-y-6">
@@ -184,7 +184,7 @@ export function RoomAvailabilityView({
       {/* Grid of Room Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredRooms.map((room) => {
-          const isMaintenance = room.status === 'maintenance';
+          const isMaintenance = room.status === 'Maintenance';
           const isAvailable = availableIds.has(room.id) && !isMaintenance;
           const occupyingSession = !isAvailable && !isMaintenance ? getOccupyingSession(room.id) : null;
           const subject = occupyingSession ? getSubject(occupyingSession.subjectId) : null;

@@ -21,6 +21,7 @@ import { mockSubjects } from '@/data/subjects';
 import { mockTeachers } from '@/data/teachers';
 import { mockGroups } from '@/data/groups';
 import { mockRooms } from '@/data/rooms';
+import { getGroupEnrollmentCount } from '@/lib/calculations/academic';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 
@@ -57,7 +58,7 @@ export function SessionDetailsModal({
   });
 
   // Calculate mock attendance metrics
-  const groupStudents = group?.studentsCount || 22;
+  const groupStudents = group ? getGroupEnrollmentCount(group.id) : 22;
   const roomCapacity = room?.capacity || 25;
   const attendanceRate = session.status === 'Completed' ? '94%' : '92% projected';
 
@@ -80,7 +81,7 @@ export function SessionDetailsModal({
                 variant={
                   session.status === 'Completed'
                     ? 'success'
-                    : session.status === 'In progress'
+                    : session.status === 'In Progress'
                     ? 'info'
                     : session.status === 'Cancelled'
                     ? 'danger'
