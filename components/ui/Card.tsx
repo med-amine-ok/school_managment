@@ -41,6 +41,7 @@ export const CardHeader: React.FC<{
         {subtitle && <p className="text-xs text-[#64748B] mt-0.5">{subtitle}</p>}
       </div>
       {action && <div className="shrink-0">{action}</div>}
+      
     </div>
   );
 };
